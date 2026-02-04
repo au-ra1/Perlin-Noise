@@ -1,17 +1,31 @@
 #Pyglet window
-import pyglet
-from Perlin2D import Perlin2D
+import pyglet as gl
+from NoiseGenerators import *
 
 
-window = pyglet.window.Window()
-label = pyglet.text.Label('Hello, world',
-                          font_name='Times New Roman',
-                          font_size=36,
-                          x=window.width//2, y=window.height//2,
-                          anchor_x='center', anchor_y='center')
+window = gl.window.Window(500, 500)
+grid_size = 250
+
+def draw_noise():
+
+    for i in range(grid_size):
+        for j in range(grid_size):
+            a = perlin(i, j)
+            if a <
+       
+
+
+
+
+
+
+
+
+
+
 @window.event
 def on_draw():
     window.clear()
-    label.draw()
-    
-pyglet.app.run()
+    draw_grid()
+
+gl.app.run()
