@@ -32,19 +32,24 @@ p += p
 
 
 
-    #compute the dot gradient
-def dot_gradient(hash, xf, yf):
-
-        match (hash & 0xF):
-            case 0x0: return  xf + yf
-            case 0x1: return -xf + yf
-            case 0x2: return  xf - yf
-            case 0x3: return -xf - yf
-            case _: return 0
+ #compute the gradient vector from the hashed corner coordinates
+def grad(hash):
+      dir_index = hash % 4
+      match (dir_index):
+        case 0: return np.array([-1, 0])
+        case 1: return np.array([1, 0])
+        case 2: return np.array([0, 1])
+        case 3: return np.array([0, -1])
+           
+#compute dot grad from the gradient and the distance vector
+def dot_grad(gv, dv):  
+     v_add = ((gv[0] * dv[0]) + (gv[1] * dv[1]))
+     return v_add
+     
 
 #linear interpolation function
-def lerp(a, b, x):
-      return (a + x * (b - a))
+def lerp(a, b, c):
+      return (a + c * (b - a))
 
 # fader function to smooth the output by adjusting coordinates towards integrals
 def fade(x):
@@ -53,44 +58,56 @@ def fade(x):
 #perlin noise
 def perlin(x, y):
 
-        #compute surrounding grid points
+        #compute 4 corners around point
         x0 = int(x)
         y0 = int(y)
         x1 = x0 + 1
         y1 = y0 + 1
 
-        #compute interpolation points (the distance vector)
-        xf0 = x - x0
-        yf0 = y - y0
-        xf1 = x - x1
-        yf1 = y - y1
+        #for each corner: compute interpolation points (the distance vector) 
+        xdv0 = x - x0
+        ydv0 = y - y0
+        xdv1 = x - x1
+        ydv1 = y - y1
+        dv1 = np.array([xdv0,  ydv0])
+        dv2 = np.array([xdv0, ydv1])
+        dv3 = np.array([xdv1, ydv0])
+        dv4 = np.array([xdv1, ydv1])
 
-        #hash a value from 0-255 for each surrounding grid point and generate the gradient vector ((0, 0), (+1, 0),(0, +1), (+1, +1))
+        #for each corner: assigns them a hash value
         xi = x0 & 255
         yi = y0 & 255  
         h00 = p[p[xi + 0] + yi + 0]
-        h01 = p[p[xi + 1] + yi + 0]
-        h10 = p[p[xi + 0] + yi + 1]
+        h01 = p[p[xi + 0] + yi + 1]
+        h10 = p[p[xi + 1] + yi + 0]
         h11 = p[p[xi + 1] + yi + 1]
 
         #compute faded values and appy to the location
-        xf0f = fade(xf0)
-        yf0f = fade(yf0)
+        xf0f = fade(xdv0)
+        yf0f = fade(ydv0)
 
         #compute the dot gradient of the gradient vector and the distance vector
-        xe1 = lerp(dot_gradient(h00, xf0, yf0), dot_gradient(h10, xf1, yf0), xf0f)
-        xe2 = lerp(dot_gradient(h01,xf0, yf1), dot_gradient(h11, xf1, yf1), xf0f)
-        ye1 = lerp(xe1, xe2, yf0f)
-        
-        return ye1
+        dg1 = dot_grad(grad(h00), dv1)
+        dg2 = dot_grad(grad(h01), dv2)
+        dg3 = dot_grad(grad(h10), dv3)
+        dg4 = dot_grad(grad(h11), dv4)
 
-  
+        #linearly interpolate the dot gradients
+            #x axis
+        xi1 = lerp(dg2, dg4, 1)
+        xi2 = lerp(dg1, dg3, 1)
 
+        #bilinearly interpolate the final interpolation value
+        yi1 = lerp(xi1, xi2, 1)
+        return ((yi1 +1) /2)
 
-
-
-
-
+arr = []
+for i in range(10):
+     for j in range(10):
+        a = np.random.uniform(0, 1)
+        b = round(perlin(i +a, j + a), 3)
+        arr.append(b)
+vvv = "vvv"
         #gradient vectors
         #gv1 = (1, 1)
         #gv2 = (-1, 1)

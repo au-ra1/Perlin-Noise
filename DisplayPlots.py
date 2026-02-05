@@ -12,7 +12,7 @@ def normal_noise_plot():
     ax.set_yticklabels("")
     ax.plot(list_x, rand_list_y, color="black", linewidth=".5")  
     plt.show()     
-normal_noise_plot()
+#normal_noise_plot()
 
 #1D Perlin noise plot
 def perlin_noise_plot():
@@ -23,3 +23,20 @@ def perlin_noise_plot():
     ax.set_yticklabels("")
     ax.plot(list_x, rand_list_y, color="black", linewidth=".5")  
     plt.show()     
+
+
+#2D Perlin noise plot
+def perlin_noise_2D():
+    width = 512
+    height = 512
+    
+
+
+
+
+
+    plt.imshow(noise_grid, cmap='gray')
+    plt.colorbar()
+    plt.show()
+
+perlin_noise_2D()
